@@ -1,0 +1,23 @@
+#==========================================================
+#= GestCostumer Web Service - Versione Base - MySQL
+#==========================================================
+server:
+    port: 8080
+spring:
+    application:
+        name: rentalcar-web-service
+    jackson:
+        serialization:
+          fail-on-empty-beans: false
+          write-self-references-as-null: true
+
+    datasource:
+        url: jdbc:mysql://localhost:3306/rentalcar_db?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+        username: root
+        password: MySQLR00TP4ssW0rD
+    jpa:
+        hibernate:
+            ddl-auto: none
+        show-sql: true
+        properties:
+            dialect: org.hibernate.dialect.MySQLDialect
