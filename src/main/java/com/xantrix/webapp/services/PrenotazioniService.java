@@ -19,7 +19,7 @@ public interface PrenotazioniService {
     void eliminaPrenotazione(Integer id);
     public void aggiornaStatoPrenotazione(Set<PrenotazioneDto> prenotazioni);
     public LocalDate convertDateToLocalDate(java.util.Date data);
-    public boolean isPrenotazioneInvalid(Integer id);
-    public boolean isPrenotazioneInvalid(java.util.Date dataInizio);
+    public boolean isPrenotazioneNotEditable(Integer id);
+    public boolean isPrenotazioneNotEditable(java.util.Date dataInizio);
     public boolean isPrenotazioneFromThePast(Integer id);
 }

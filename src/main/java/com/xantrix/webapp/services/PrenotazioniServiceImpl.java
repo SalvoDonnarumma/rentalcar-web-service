@@ -34,10 +34,11 @@ public class PrenotazioniServiceImpl implements PrenotazioniService {
     public PrenotazioneDto selById(Integer id) {
         PrenotazioneDto prenotazioneDto = null;
         Pageable pageAndRecords = PageRequest.of(0, 1);
-        if(id != null) {
+        if(prenotazioniRepository.existsById(id)) {
             prenotazioneDto = ConvertToDto(prenotazioniRepository.findByIdPrenotazione(id, pageAndRecords).getContent().get(0));
-        }
-        return prenotazioneDto;
+            return prenotazioneDto;
+        } else
+            return null;
     }
 
     @Override
@@ -137,7 +138,7 @@ public class PrenotazioniServiceImpl implements PrenotazioniService {
                 insertPrenotazione(p);
             }
 
-            p.setIsDataValida(dataInizio.isAfter(limite));
+            p.setIsPrenotazioneValid(dataInizio.isAfter(limite));
         }
     }
 
@@ -145,7 +146,7 @@ public class PrenotazioniServiceImpl implements PrenotazioniService {
         return data.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
-    public boolean isPrenotazioneInvalid(Integer id){
+    public boolean isPrenotazioneNotEditable(Integer id){
         PrenotazioneDto prenotazione = selById(id);
         java.util.Date dataP = prenotazione.getDataInizio();
         LocalDate dataPrenotazione = convertDateToLocalDate(dataP);
@@ -154,7 +155,7 @@ public class PrenotazioniServiceImpl implements PrenotazioniService {
         return !dataPrenotazione.isAfter(dataOdierna.plusDays(2));
     }
 
-    public boolean isPrenotazioneInvalid(java.util.Date dataInizio){
+    public boolean isPrenotazioneNotEditable(java.util.Date dataInizio){
         LocalDate dataPrenotazione = convertDateToLocalDate(dataInizio);
         LocalDate dataOdierna = LocalDate.now();
 

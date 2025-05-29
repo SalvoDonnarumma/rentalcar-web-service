@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 @Log
 @RestController
@@ -108,7 +109,7 @@ public class UtentiController {
             log.info(">>>Inserimento Nuovo Utente");
 
         if(bindingResult.hasErrors()){
-            String msgErr = errMessage.getMessage(bindingResult.getFieldError(), LocaleContextHolder.getLocale());
+            String msgErr = errMessage.getMessage(Objects.requireNonNull(bindingResult.getFieldError()), LocaleContextHolder.getLocale());
             log.warning(msgErr);
             throw new BindingException(msgErr);
         }

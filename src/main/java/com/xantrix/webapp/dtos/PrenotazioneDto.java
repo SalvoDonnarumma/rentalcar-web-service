@@ -21,7 +21,7 @@ public class PrenotazioneDto {
     private Integer idUtente;
     private Integer idVeicolo;
 
-    private Boolean isDataValida;
+    private Boolean isPrenotazioneValid;
 
     @Override
     public String toString() {
@@ -30,7 +30,7 @@ public class PrenotazioneDto {
                 ", utenteId=" + idUtente +
                 ", veicoloId=" + idVeicolo +
                 ", stato=" + stato +
-                ", IsDataValida=" + isDataValida +
+                ", IsDataValida=" + isPrenotazioneValid +
                 '}';
     }
 }
