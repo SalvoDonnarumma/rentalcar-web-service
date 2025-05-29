@@ -1,28 +1,25 @@
 package com.xantrix.webapp.services;
 
 import com.xantrix.webapp.dtos.UtenteDto;
-import com.xantrix.webapp.entities.Utente;
 
 import java.util.List;
 
 public interface UtentiService {
 
-    public List<UtenteDto> SelAll();
+    public List<UtenteDto> selAll();
 
-    List<UtenteDto> SearchCostumers(String filtro, String campoFiltro, int pageNum, int recForPage);
+    List<UtenteDto> searchCostumers(String filtro, String campoFiltro, int pageNum, int recForPage);
 
-    int NumRecords();
+    int getNumRecords();
 
-    public void InsertCostumer(UtenteDto utente);
+    public void insertCostumer(UtenteDto utente);
 
-    public void DeleteCostumer(Integer id);
+    public void deleteCostumer(Integer id);
 
-    public UtenteDto SelById(Integer id);
+    public UtenteDto selById(Integer id);
 
-    public UtenteDto SelByEmail(String email);
+    public UtenteDto selByEmail(String email);
 
-    public boolean EmailExists(String email, Integer idUtente);
-    public boolean EmailExists(String email);
-
-    public List<UtenteDto> SelTutti();
+    public boolean emailExists(String email, Integer idUtente);
+    public boolean emailExists(String email);
 }

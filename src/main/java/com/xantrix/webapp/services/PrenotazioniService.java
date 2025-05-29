@@ -9,17 +9,17 @@ import java.util.Set;
 
 public interface PrenotazioniService {
 
-    public PrenotazioneDto SelById(Integer id);
-    public List<PrenotazioneDto> SelByIdUtente(Integer idUtente, int pageNum, int recForPage, String dataInit, String dataFin);
-    public List<PrenotazioneDto> SelByIdVeicolo(Integer idVeicolo, int pageNum, int recForPage);
-    public List<PrenotazioneDto> SelByVeicolo(Veicolo veicolo, int pageNum, int recForPage);
+    public PrenotazioneDto selById(Integer id);
+    public List<PrenotazioneDto> selByIdUtente(Integer idUtente, int pageNum, int recForPage, String dataInit, String dataFin);
+    public List<PrenotazioneDto> selByIdVeicolo(Integer idVeicolo, int pageNum, int recForPage);
+    public List<PrenotazioneDto> selByVeicolo(Veicolo veicolo, int pageNum, int recForPage);
 
-    public void InsertPrenotazione(PrenotazioneDto prenotazione);
+    public void insertPrenotazione(PrenotazioneDto prenotazione);
 
-    void EliminaPrenotazione(Integer id);
-    public void AggiornaStatoPrenotazione(Set<PrenotazioneDto> prenotazioni);
-    public LocalDate ConvertDateToLocalDate(java.util.Date data);
-    public boolean IsPrenotazioneInvalid(Integer id);
-    public boolean IsPrenotazioneInvalid(java.util.Date dataInizio);
-    public boolean IsPrenotazioneFromThePast(Integer id);
+    void eliminaPrenotazione(Integer id);
+    public void aggiornaStatoPrenotazione(Set<PrenotazioneDto> prenotazioni);
+    public LocalDate convertDateToLocalDate(java.util.Date data);
+    public boolean isPrenotazioneInvalid(Integer id);
+    public boolean isPrenotazioneInvalid(java.util.Date dataInizio);
+    public boolean isPrenotazioneFromThePast(Integer id);
 }

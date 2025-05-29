@@ -24,15 +24,13 @@ public class UtentiServiceImpl implements UtentiService {
     private ModelMapper modelMapper;
 
     @Override
-    public List<UtenteDto> SelAll() {
+    public List<UtenteDto> selAll() {
         List<Utente> utenti = utentiRepository.findAll();
-        System.out.println("Totale utenti: " + utenti.size());
-
         return ConvertToDto(utenti);
     }
 
     @Override
-    public List<UtenteDto> SearchCostumers(String filtro, String campoFiltro, int pageNum, int recForPage) {
+    public List<UtenteDto> searchCostumers(String filtro, String campoFiltro, int pageNum, int recForPage) {
         Pageable pageAndRecords = PageRequest.of(pageNum, recForPage);
         Page<Utente> resultPage = null;
 
@@ -60,17 +58,17 @@ public class UtentiServiceImpl implements UtentiService {
     }
 
     @Override
-    public int NumRecords() {
+    public int getNumRecords() {
         return (int) utentiRepository.count();
     }
 
     @Override
-    public void InsertCostumer(UtenteDto utente) {
+    public void insertCostumer(UtenteDto utente) {
         utentiRepository.save(ConvertFromDto(utente));
     }
 
     @Override
-    public void DeleteCostumer(Integer id) {
+    public void deleteCostumer(Integer id) {
         Utente utente = null;
         if(utentiRepository.findById(id).isPresent()) {
             utente = utentiRepository.findById(id).get();
@@ -79,7 +77,7 @@ public class UtentiServiceImpl implements UtentiService {
     }
 
     @Override
-    public UtenteDto SelById(Integer id) {
+    public UtenteDto selById(Integer id) {
         Utente utente = null;
         if(utentiRepository.findById(id).isPresent())
             utente = utentiRepository.findById(id).get();
@@ -89,25 +87,20 @@ public class UtentiServiceImpl implements UtentiService {
     }
 
     @Override
-    public UtenteDto SelByEmail(String email) {
+    public UtenteDto selByEmail(String email) {
         Pageable pageAndRecords = PageRequest.of(0, 1);
         Utente utente = utentiRepository.findByEmailContainingIgnoreCase(email, pageAndRecords).getContent().get(0);
         return ConvertToDto(utente);
     }
 
     @Override
-    public boolean EmailExists(String email, Integer idUtente) {
+    public boolean emailExists(String email, Integer idUtente) {
         return utentiRepository.findByEmailAndIdUtenteNot(email, idUtente).isPresent();
     }
 
     @Override
-    public boolean EmailExists(String email) {
+    public boolean emailExists(String email) {
         return utentiRepository.findByEmail(email).isPresent();
-    }
-
-    @Override
-    public List<UtenteDto> SelTutti() {
-        return ConvertToDto(utentiRepository.findAll());
     }
 
     private List<UtenteDto> ConvertToDto(List<Utente> utenti) {

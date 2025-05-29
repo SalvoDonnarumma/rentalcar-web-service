@@ -22,47 +22,47 @@ public class VeicoliServiceImpl implements VeicoliService {
     private ModelMapper modelMapper;
 
     @Override
-    public int NumRecords() {
+    public int getNumRecords() {
         return (int) veicoliRepository.count();
     }
 
     @Override
-    public void InsertVeicolo(VeicoloDto veicoloDto) {
+    public void insertVeicolo(VeicoloDto veicoloDto) {
         veicoliRepository.save(ConvertFromDto(veicoloDto));
     }
 
     @Override
-    public void DelVeicoloById(Integer id) {
-        veicoliRepository.deleteById(id);
+    public void delVeicoloById(Integer id) {
+        if(veicoliRepository.findById(id).isPresent()) {
+            veicoliRepository.deleteById(id);
+        }
     }
 
     @Override
-    public VeicoloDto SelByTarga(String targa) {
+    public VeicoloDto selByTarga(String targa) {
         Pageable pageAndRecords = PageRequest.of(0, 1);
         Veicolo veicolo = (veicoliRepository.findByTarga(targa,pageAndRecords).getContent().get(0));
         return ConvertToDto(veicolo);
     }
 
     @Override
-    public VeicoloDto SelById(Integer id) {
+    public VeicoloDto selById(Integer id) {
         Pageable pageAndRecords = PageRequest.of(0, 1);
-        Veicolo veicolo = (veicoliRepository.findById(id).get());
+        Veicolo veicolo = null;
+        if(veicoliRepository.findById(id).isPresent()) {
+            veicolo = (veicoliRepository.findById(id).get());
+        } else
+            return null;
         return ConvertToDto(veicolo);
     }
 
     @Override
-    public void DelVeicoloByTarga(String targa) {
-        Veicolo daCancellare = ConvertFromDto(SelByTarga(targa));
-        veicoliRepository.delete(daCancellare);
-    }
-
-    @Override
-    public List<VeicoloDto> SelAll() {
+    public List<VeicoloDto> selAll() {
         return ConvertToDto(veicoliRepository.findAll());
     }
 
     @Override
-    public List<VeicoloDto> SearchVeicoli(String filtro, String campoFiltro, int realPage, int recForPage) {
+    public List<VeicoloDto> searchVeicoli(String filtro, String campoFiltro, int realPage, int recForPage) {
         Pageable pageAndRecords = PageRequest.of(realPage, recForPage);
         Page<Veicolo> resultPage = null;
 

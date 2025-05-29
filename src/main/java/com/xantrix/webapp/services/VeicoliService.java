@@ -6,19 +6,17 @@ import java.util.List;
 
 public interface VeicoliService {
 
-    public List<VeicoloDto> SelAll();
+    public List<VeicoloDto> selAll();
 
-    List<VeicoloDto> SearchVeicoli(String filtro, String campoFiltro, int realPage, int recForPage);
+    List<VeicoloDto> searchVeicoli(String filtro, String campoFiltro, int realPage, int recForPage);
 
-    int NumRecords();
+    int getNumRecords();
 
-    public void InsertVeicolo(VeicoloDto veicolo);
+    public void insertVeicolo(VeicoloDto veicolo);
 
-    void DelVeicoloById(Integer id);
+    void delVeicoloById(Integer id);
 
-    void DelVeicoloByTarga(String targa);
+    public VeicoloDto selByTarga(String targa);
 
-    public VeicoloDto SelByTarga(String targa);
-
-    public VeicoloDto SelById(Integer id);
+    public VeicoloDto selById(Integer id);
 }

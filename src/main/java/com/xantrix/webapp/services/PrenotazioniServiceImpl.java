@@ -31,7 +31,7 @@ public class PrenotazioniServiceImpl implements PrenotazioniService {
     private ModelMapper modelMapper;
 
     @Override
-    public PrenotazioneDto SelById(Integer id) {
+    public PrenotazioneDto selById(Integer id) {
         PrenotazioneDto prenotazioneDto = null;
         Pageable pageAndRecords = PageRequest.of(0, 1);
         if(id != null) {
@@ -41,7 +41,7 @@ public class PrenotazioniServiceImpl implements PrenotazioniService {
     }
 
     @Override
-    public List<PrenotazioneDto> SelByIdUtente(Integer idUtente, int pageNum, int recForPage, String dataInit, String dataFin) {
+    public List<PrenotazioneDto> selByIdUtente(Integer idUtente, int pageNum, int recForPage, String dataInit, String dataFin) {
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         Date inizio = null;
@@ -72,24 +72,24 @@ public class PrenotazioniServiceImpl implements PrenotazioniService {
     }
 
     @Override
-    public List<PrenotazioneDto> SelByIdVeicolo(Integer idVeicolo, int pageNum, int recForPage) {
+    public List<PrenotazioneDto> selByIdVeicolo(Integer idVeicolo, int pageNum, int recForPage) {
         Pageable pageAndRecords = PageRequest.of(pageNum, recForPage);
         return ConvertToDto(prenotazioniRepository.findByVeicoloIdVeicolo(idVeicolo, pageAndRecords).getContent());
     }
 
     @Override
-    public List<PrenotazioneDto> SelByVeicolo(Veicolo veicolo, int pageNum, int recForPage) {
+    public List<PrenotazioneDto> selByVeicolo(Veicolo veicolo, int pageNum, int recForPage) {
         return List.of();
     }
 
     @Override
-    public void InsertPrenotazione(PrenotazioneDto prenotazione) {
+    public void insertPrenotazione(PrenotazioneDto prenotazione) {
         prenotazioniRepository.save(ConvertFromDto(prenotazione));
     }
 
     @Override
     @Transactional
-    public void EliminaPrenotazione(Integer id) {
+    public void eliminaPrenotazione(Integer id) {
         Prenotazione prenotazione = prenotazioniRepository.findById(id).get();
 
         Utente utente = prenotazione.getUtente();
@@ -128,43 +128,43 @@ public class PrenotazioniServiceImpl implements PrenotazioniService {
         return prenotazione;
     }
 
-    public void AggiornaStatoPrenotazione(Set<PrenotazioneDto> prenotazioni){
+    public void aggiornaStatoPrenotazione(Set<PrenotazioneDto> prenotazioni){
         LocalDate limite = LocalDate.now().plusDays(2);
         for (PrenotazioneDto p : prenotazioni) {
-            LocalDate dataInizio = ConvertDateToLocalDate(p.getDataInizio());
+            LocalDate dataInizio = convertDateToLocalDate(p.getDataInizio());
             if (!dataInizio.isAfter(limite) && p.getStato().equals("IN ATTESA")) {
                 p.setStato("DECLINATO");
-                InsertPrenotazione(p);
+                insertPrenotazione(p);
             }
 
             p.setIsDataValida(dataInizio.isAfter(limite));
         }
     }
 
-    public LocalDate ConvertDateToLocalDate(java.util.Date data) {
+    public LocalDate convertDateToLocalDate(java.util.Date data) {
         return data.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
     }
 
-    public boolean IsPrenotazioneInvalid(Integer id){
-        PrenotazioneDto prenotazione = SelById(id);
+    public boolean isPrenotazioneInvalid(Integer id){
+        PrenotazioneDto prenotazione = selById(id);
         java.util.Date dataP = prenotazione.getDataInizio();
-        LocalDate dataPrenotazione = ConvertDateToLocalDate(dataP);
+        LocalDate dataPrenotazione = convertDateToLocalDate(dataP);
         LocalDate dataOdierna = LocalDate.now();
 
         return !dataPrenotazione.isAfter(dataOdierna.plusDays(2));
     }
 
-    public boolean IsPrenotazioneInvalid(java.util.Date dataInizio){
-        LocalDate dataPrenotazione = ConvertDateToLocalDate(dataInizio);
+    public boolean isPrenotazioneInvalid(java.util.Date dataInizio){
+        LocalDate dataPrenotazione = convertDateToLocalDate(dataInizio);
         LocalDate dataOdierna = LocalDate.now();
 
         return !dataPrenotazione.isAfter(dataOdierna.plusDays(2));
     }
 
-    public boolean IsPrenotazioneFromThePast(Integer id){
-        PrenotazioneDto prenotazione = SelById(id);
+    public boolean isPrenotazioneFromThePast(Integer id){
+        PrenotazioneDto prenotazione = selById(id);
         java.util.Date dataP = prenotazione.getDataFine();
-        LocalDate dataPrenotazione = ConvertDateToLocalDate(dataP);
+        LocalDate dataPrenotazione = convertDateToLocalDate(dataP);
         LocalDate dataOdierna = LocalDate.now();
 
         return dataPrenotazione.isBefore(dataOdierna.minusDays(1));

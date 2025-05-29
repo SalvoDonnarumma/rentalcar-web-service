@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.xantrix.webapp.dtos.PageResponse;
 import com.xantrix.webapp.dtos.UtenteDto;
-import com.xantrix.webapp.entities.Utente;
 import com.xantrix.webapp.exception.BindingException;
 import com.xantrix.webapp.exception.NotFoundException;
 import com.xantrix.webapp.services.UtentiService;
@@ -40,7 +39,7 @@ public class UtentiController {
     public List<UtenteDto> getAllUser()
     {
         log.info("Otteniamo tutti gli utenti");
-        return utentiService.SelTutti();
+        return utentiService.selAll();
     }
 
     @GetMapping(value = "/cerca/userid/{userId}")
@@ -49,7 +48,7 @@ public class UtentiController {
     {
         log.info("Otteniamo l'utente " + userId);
 
-        UtenteDto utente = utentiService.SelById(Integer.parseInt(userId));
+        UtenteDto utente = utentiService.selById(Integer.parseInt(userId));
 
         if (utente == null)
         {
@@ -68,20 +67,28 @@ public class UtentiController {
     // ------------------- OTTENIMENTO LISTA COSTUMER CON PAGING  ------------------------------------
     @GetMapping("/admin/homepage")
     public ResponseEntity<PageResponse<UtenteDto>> searchUtenti(
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int recordsPerPage,
+            @RequestParam(name = "diff", defaultValue = "0") int diffPage,
             @RequestParam(required = false) String filtro,
             @RequestParam(required = false) String campoFiltro
     ) {
-        int pageZeroBased = page - 1;
 
-        List<UtenteDto> utenti = utentiService.SearchCostumers(filtro, campoFiltro, pageZeroBased, size);
-        int totalRecords = utentiService.NumRecords();
+        if (pageNum >= 1) {
+            pageNum += diffPage;
+        } else {
+            pageNum = 1;
+        }
+
+        int pageZeroBased = pageNum - 1;
+
+        List<UtenteDto> utenti = utentiService.searchCostumers(filtro, campoFiltro, pageZeroBased, recordsPerPage);
+        int totalRecords = utentiService.getNumRecords();
 
         PageResponse<UtenteDto> response = new PageResponse<>(
                 utenti,
-                page,
-                size,
+                pageZeroBased,
+                recordsPerPage,
                 totalRecords
         );
 
@@ -106,7 +113,7 @@ public class UtentiController {
             throw new BindingException(msgErr);
         }
 
-        utentiService.InsertCostumer(utente);
+        utentiService.insertCostumer(utente);
 
         return new ResponseEntity<InfoMsg>(new InfoMsg(LocalDate.now(),
                 String.format("Inserimento Utente %s Eseguita Con Successo", utente.getEmail())), HttpStatus.CREATED);
@@ -119,7 +126,7 @@ public class UtentiController {
     {
         log.info("Eliminiamo l'utente con id " + userId);
 
-        UtenteDto utente = utentiService.SelById(Integer.parseInt(userId));
+        UtenteDto utente = utentiService.selById(Integer.parseInt(userId));
         if (utente == null)
         {
             String MsgErr = String.format("Utente %s non presente in anagrafica! ", userId);
@@ -127,7 +134,7 @@ public class UtentiController {
             throw new NotFoundException(MsgErr);
         }
 
-        utentiService.DeleteCostumer(utente.getId());
+        utentiService.deleteCostumer(utente.getId());
 
         HttpHeaders headers = new HttpHeaders();
         ObjectMapper mapper = new ObjectMapper();
