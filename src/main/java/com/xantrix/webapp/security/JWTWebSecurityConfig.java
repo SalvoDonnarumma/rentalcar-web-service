@@ -32,11 +32,6 @@ import java.util.List;
 public class JWTWebSecurityConfig 
 {
 	private static String REALM = "REAME";
-	
-	/*
-	@Autowired
-	private JwtUnAuthorizedResponseAuthenticationEntryPoint jwtUnAuthorizedResponseAuthenticationEntryPoint;
-	 */
 
 	@Autowired
 	@Qualifier("customUtenteDetailsService")
@@ -51,8 +46,10 @@ public class JWTWebSecurityConfig
 		return new BCryptPasswordEncoder();
 	}
 
-	private static final String[] USER_MATCHER = { "/utenti/cerca/tutti", "/utenti/inserisci/"};
-	private static final String[] ADMIN_MATCHER = { "/utenti/cerca/userid/**", "/utenti/admin/**", "utenti/elimina/**"};
+	private static final String[] USER_MATCHER = { "/utenti/cerca/tutti", "/utenti/inserisci/", "/utenti/modifica/**", "/veicoli/cerca/tutti/",
+			"/prenotazioni/modifica/**", "/prenotazioni/inserisci", "/prenotazioni/elimina/**", "/prenotazioni/cerca/userid/"};
+	private static final String[] ADMIN_MATCHER = { "/utenti/cerca/userid/**", "/utenti/admin/**", "utenti/elimina/**", "/utenti/admin/homepage", "/admin/modifica/**",
+			"/veicoli/cerca/veicoloid/**", "/veicoli/admin/**", "/veicoli/inserisci/**", "/veicoli/elimina/**","/prenotazioni/valida/**"};
 
 	@Bean
 	@SneakyThrows

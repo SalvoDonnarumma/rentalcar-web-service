@@ -83,7 +83,6 @@ public class JwtTokenAuthorizationOncePerRequestFilter extends OncePerRequestFil
 			log.warning(">>>>Username nullo o Authentication già presente nel contesto");
 		}
 
-
 		chain.doFilter(request, response);
 	}
 }
