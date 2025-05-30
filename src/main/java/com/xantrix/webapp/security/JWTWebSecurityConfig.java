@@ -28,17 +28,17 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class JWTWebSecurityConfig 
 {
 	private static String REALM = "REAME";
 
-	@Autowired
-	@Qualifier("customUtenteDetailsService")
 	private UserDetailsService userDetailsService;
-
-	@Autowired
 	private JwtTokenAuthorizationOncePerRequestFilter jwtAuthenticationTokenFilter;
+
+	public JWTWebSecurityConfig(JwtTokenAuthorizationOncePerRequestFilter jwtAuthenticationTokenFilter, @Qualifier("customUtenteDetailsService") UserDetailsService userDetailsService) {
+		this.jwtAuthenticationTokenFilter = jwtAuthenticationTokenFilter;
+		this.userDetailsService = userDetailsService;
+	}
 	
 	@Bean
 	static PasswordEncoder passwordEncoderBean() 
@@ -76,15 +76,6 @@ public class JWTWebSecurityConfig
 	JwtUnAuthorizedResponseAuthenticationEntryPoint getBasicAuthEntryPoint()
 	{
 		return new JwtUnAuthorizedResponseAuthenticationEntryPoint();
-	}
-	
-	@Autowired
-	@SneakyThrows
-	public void configureGlobal(AuthenticationManagerBuilder auth) 
-	{
-	    	auth
-	    		.userDetailsService(userDetailsService)
-	    		.passwordEncoder(new BCryptPasswordEncoder());
 	}
 	
 	@Bean

@@ -22,12 +22,14 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Log
 public class JwtTokenAuthorizationOncePerRequestFilter extends OncePerRequestFilter
 {
-	@Autowired
-	@Qualifier("customUtenteDetailsService")
 	private UserDetailsService userDetailsService;
 
-	@Autowired
 	private JwtTokenUtil jwtTokenUtil;
+
+	public JwtTokenAuthorizationOncePerRequestFilter(@Qualifier("customUtenteDetailsService") UserDetailsService userDetailsService, JwtTokenUtil jwtTokenUtil) {
+		this.userDetailsService = userDetailsService;
+		this.jwtTokenUtil = jwtTokenUtil;
+	}
 
 	@Value("${sicurezza.header}")
 	private String tokenHeader = "";

@@ -1,4 +1,4 @@
-package com.xantrix.webapp.controllers;
+package com.xantrix.webapp.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

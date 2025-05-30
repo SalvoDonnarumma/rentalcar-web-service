@@ -26,7 +26,7 @@ public class PrenotazioniController {
     private VeicoliService veicoliService;
     private ResourceBundleMessageSource errMessage;
 
-    private PrenotazioniController(PrenotazioniService prenotazioniService, ResourceBundleMessageSource errMessage, UtentiService utentiService, VeicoliService veicoliService) {
+    public PrenotazioniController(PrenotazioniService prenotazioniService, ResourceBundleMessageSource errMessage, UtentiService utentiService, VeicoliService veicoliService) {
         this.prenotazioniService = prenotazioniService;
         this.errMessage = errMessage;
         this.utentiService = utentiService;

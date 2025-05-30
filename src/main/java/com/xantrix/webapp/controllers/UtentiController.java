@@ -2,6 +2,7 @@ package com.xantrix.webapp.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.xantrix.webapp.dtos.InfoMsg;
 import com.xantrix.webapp.dtos.PageResponse;
 import com.xantrix.webapp.dtos.UtenteDto;
 import com.xantrix.webapp.exception.BindingException;
@@ -31,7 +32,7 @@ public class UtentiController {
     private ResourceBundleMessageSource errMessage;
     //private BCryptPasswordEncoder passwordEncoder;
 
-    private UtentiController(UtentiService utentiService, ResourceBundleMessageSource errMessage) {
+    public UtentiController(UtentiService utentiService, ResourceBundleMessageSource errMessage) {
         this.utentiService = utentiService;
         this.errMessage = errMessage;
     }

@@ -33,15 +33,15 @@ public class AuthController {
     @Value("${sicurezza.header}")
     private String tokenHeader;
 
-    @Autowired
     private AuthenticationManager authenticationManager;
-
-    @Autowired
     private JwtTokenUtil jwtTokenUtil;
-
-    @Autowired
-    @Qualifier("customUtenteDetailsService")
     private UserDetailsService userDetailsService;
+
+    public AuthController(AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil, @Qualifier("customUtenteDetailsService") UserDetailsService userDetailsService) {
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenUtil = jwtTokenUtil;
+        this.userDetailsService = userDetailsService;
+    }
 
     @PostMapping("${sicurezza.uri}")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody AuthRequest authenticationRequest) {

@@ -27,9 +27,11 @@ public class JwtTokenUtil implements Serializable {
 	private static final long serialVersionUID = -3301605591108950415L;
 	final Date createdDate = new Date();
 
-	@Autowired
 	private JwtConfig jwtConfig;
 
+	public JwtTokenUtil(JwtConfig jwtConfig) {
+		this.jwtConfig = jwtConfig;
+	}
 
 	public String getUsernameFromToken(String token)
 	{

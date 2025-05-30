@@ -2,6 +2,7 @@ package com.xantrix.webapp.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.xantrix.webapp.dtos.InfoMsg;
 import com.xantrix.webapp.dtos.PageResponse;
 import com.xantrix.webapp.dtos.VeicoloDto;
 import com.xantrix.webapp.exception.BindingException;
@@ -30,7 +31,7 @@ public class VeicoliController {
     private VeicoliService veicoliService;
     private ResourceBundleMessageSource errMessage;
 
-    private VeicoliController(VeicoliService service, ResourceBundleMessageSource errMessage ) {
+    public VeicoliController(VeicoliService service, ResourceBundleMessageSource errMessage ) {
         this.veicoliService = service;
         this.errMessage = errMessage;
     }

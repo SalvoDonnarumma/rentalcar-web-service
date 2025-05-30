@@ -15,8 +15,11 @@ import java.util.List;
 @Service("customUtenteDetailsService")
 public class CustomUtenteDetailsService implements UserDetailsService {
 
-    @Autowired
     private UtentiService utentiService;
+
+    public CustomUtenteDetailsService(UtentiService utentiService) {
+        this.utentiService = utentiService;
+    }
 
     @Override
     @Transactional
