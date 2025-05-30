@@ -39,16 +39,8 @@ public class RestExceptionHandler extends  ResponseEntityExceptionHandler
         return new ResponseEntity<ErrorResponse>(errore, new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 
-    /*
-    @ExceptionHandler(DuplicateException.class)
-    public ResponseEntity<ErrorResponse> exceptionDeplicateRecordHandler(Exception ex)
-    {
-        ErrorResponse errore = new ErrorResponse();
-
-        errore.setDate(LocalDate.now());
-        errore.setCode(HttpStatus.NOT_ACCEPTABLE.value());
-        errore.setMessage(ex.getMessage());
-
-        return new ResponseEntity<ErrorResponse>(errore, HttpStatus.NOT_ACCEPTABLE);
-    } */
+    @ExceptionHandler({AuthenticationException.class })
+    public ResponseEntity<String> handleAuthenticationException(AuthenticationException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+    }
 }

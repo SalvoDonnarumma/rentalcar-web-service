@@ -21,3 +21,22 @@ spring:
         show-sql: true
         properties:
             dialect: org.hibernate.dialect.MySQLDialect
+
+# ==============================================================
+# = Parametri Sicurezza JWT
+# ==============================================================
+sicurezza:
+    uri: /auth
+    refresh: /refresh
+    header: Authorization
+    prefix: Bearer
+    expiration: 600
+    secret: jwt.secret=JsU8d92jKhd7d72Gkldg7yDuhf3827shd72GHjsd839sjdhS28dhajshdGd29sjdhfjdksd9281
+# ==============================================================
+# = Livello Log di Sicurezza
+# ==============================================================
+logging:
+    level:
+        org:
+            springframework:
+                security: DEBUG
