@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.xantrix.webapp.dtos.InfoMsg;
 import com.xantrix.webapp.dtos.PageResponse;
 import com.xantrix.webapp.dtos.UtenteDto;
+import com.xantrix.webapp.exception.AuthenticationException;
 import com.xantrix.webapp.exception.BindingException;
+import com.xantrix.webapp.exception.DateNotValidException;
 import com.xantrix.webapp.exception.NotFoundException;
 import com.xantrix.webapp.services.UtentiService;
 import lombok.SneakyThrows;
@@ -16,6 +18,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,11 +37,12 @@ public class UtentiController {
 
     private UtentiService utentiService;
     private ResourceBundleMessageSource errMessage;
-    //private BCryptPasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
-    public UtentiController(UtentiService utentiService, ResourceBundleMessageSource errMessage) {
+    public UtentiController(UtentiService utentiService, ResourceBundleMessageSource errMessage, PasswordEncoder passwordEncoder) {
         this.utentiService = utentiService;
         this.errMessage = errMessage;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping(value = "/cerca/tutti")
@@ -113,21 +121,69 @@ public class UtentiController {
     @PostMapping(value = "/inserisci")
     @SneakyThrows
     public ResponseEntity<InfoMsg> insertUtente(
-            @RequestBody UtenteDto utente,
-            BindingResult bindingResult)
+            @RequestBody UtenteDto utente)
     {
         if(utente.getId() != null){
             log.info(">>>Modifica Utente");
         } else
             log.info(">>>Inserimento Nuovo Utente");
 
-        if(bindingResult.hasErrors()){
-            String msgErr = errMessage.getMessage(Objects.requireNonNull(bindingResult.getFieldError()), LocaleContextHolder.getLocale());
-            log.warning(msgErr);
-            throw new BindingException(msgErr);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String ruolo = authentication.getAuthorities().toString();
+
+        log.info("Ruolo: " + ruolo);
+
+        if(ruolo.equalsIgnoreCase("[ROLE_USER]") && utente.getId()==null){ //Un costumer sta provando ad inserire un nuovo costumer, azione non permessa
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new InfoMsg(LocalDate.now(), "Un customer non può inserire un nuovo customer!"));
+        } else if(ruolo.equalsIgnoreCase("[ROLE_ADMIN]") && utente.getId()==null){//Un admin sta provando ad inserire un nuovo costumer.
+            //Controllo email già esistente
+            if(utentiService.emailExists(utente.getEmail())){
+                return ResponseEntity.badRequest()
+                        .body(new InfoMsg(LocalDate.now(), "L'email inserita esiste e' gia' in uso!"));
+            }
+
+            utente.setPassword(passwordEncoder.encode(utente.getPassword()));
+            utentiService.insertCostumer(utente);
         }
 
-        utentiService.insertCostumer(utente);
+        if( (ruolo.equalsIgnoreCase("[ROLE_ADMIN]") || ruolo.equalsIgnoreCase("[ROLE_USER]") ) && utente.getId()!=null) {
+
+            if(ruolo.equalsIgnoreCase("[ROLE_USER]")){
+                UtenteDto logged = utentiService.selByEmail(authentication.getName());
+                if(logged.getId() != utente.getId()){ //Un costumer stra provando a modificare un altro costumer
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body(new InfoMsg(LocalDate.now(), "Un customer non può modificare un altro customer!"));
+                }
+            }
+
+            //Controllo vecchia password valida
+            String hashedPasswordOnDB = utentiService.selById(utente.getId()).getVecchiaPassword();
+            if(!passwordEncoder.matches(utente.getVecchiaPassword(), hashedPasswordOnDB)){
+                return ResponseEntity.badRequest()
+                        .body(new InfoMsg(LocalDate.now(), "La vecchia password inserita non è corretta!"));
+            }
+
+            //Controllo nuova password e conferma password
+            if(utente.getPassword()!=null) {
+                if (!utente.getPassword().equals(utente.getConfermaPassword())) {
+                    return ResponseEntity.badRequest()
+                            .body(new InfoMsg(LocalDate.now(), "La password nuova e quella di conferma non coincidono!"));
+                }
+                utente.setPassword(passwordEncoder.encode(utente.getConfermaPassword()));
+            } else
+                utente.setPassword(hashedPasswordOnDB);
+
+            //Controlla email valida
+            if(utentiService.emailExists(utente.getEmail(), utente.getId())){
+                return ResponseEntity.badRequest()
+                        .body(new InfoMsg(LocalDate.now(), "L'email inserita esiste e' gia' in uso!"));
+            }
+
+            log.info("Utente json passato: " + utente);
+
+            utentiService.insertCostumer(utente);
+        }
 
         return new ResponseEntity<InfoMsg>(new InfoMsg(LocalDate.now(),
                 String.format("Inserimento Utente %s Eseguita Con Successo", utente.getEmail())), HttpStatus.CREATED);

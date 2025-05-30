@@ -66,23 +66,17 @@ public class AuthController {
         log.info("Tentativo Refresh Token");
         String authToken = request.getHeader(tokenHeader);
 
-        if (authToken == null)
-        {
+        if (authToken == null) {
             throw new Exception("Token assente o non valido!");
         }
 
         final String token = authToken;
 
-        if (jwtTokenUtil.canTokenBeRefreshed(token))
-        {
+        if (jwtTokenUtil.canTokenBeRefreshed(token)) {
             String refreshedToken = jwtTokenUtil.refreshToken(token);
-
             log.warning(String.format("Refreshed Token %s", refreshedToken));
-
             return ResponseEntity.ok(new JwtTokenResponse(refreshedToken));
-        }
-        else
-        {
+        } else {
             return ResponseEntity.badRequest().body(null);
         }
     }
@@ -92,17 +86,13 @@ public class AuthController {
         Objects.requireNonNull(username);
         Objects.requireNonNull(password);
 
-        try
-        {
+        try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        }
-        catch (DisabledException e)
-        {
+        } catch (DisabledException e) {
             log.warning("UTENTE DISABILITATO");
             throw new AuthenticationException("UTENTE DISABILITATO", e);
         }
-        catch (BadCredentialsException e)
-        {
+        catch (BadCredentialsException e) {
             log.warning("CREDENZIALI NON VALIDE");
             throw new AuthenticationException("CREDENZIALI NON VALIDE", e);
         }
