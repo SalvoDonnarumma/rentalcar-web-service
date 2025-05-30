@@ -1,12 +1,11 @@
 package com.xantrix.webapp.controllers;
 
-import com.xantrix.webapp.dtos.PageResponse;
-import com.xantrix.webapp.dtos.PrenotazioneDto;
-import com.xantrix.webapp.dtos.UtenteDto;
+import com.xantrix.webapp.dtos.*;
 import com.xantrix.webapp.exception.DateNotValidException;
 import com.xantrix.webapp.exception.NotFoundException;
 import com.xantrix.webapp.services.PrenotazioniService;
 import com.xantrix.webapp.services.UtentiService;
+import com.xantrix.webapp.services.VeicoliService;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
 import org.springframework.context.support.ResourceBundleMessageSource;
@@ -24,17 +23,19 @@ public class PrenotazioniController {
 
     private PrenotazioniService prenotazioniService;
     private UtentiService utentiService;
+    private VeicoliService veicoliService;
     private ResourceBundleMessageSource errMessage;
 
-    private PrenotazioniController(PrenotazioniService prenotazioniService, ResourceBundleMessageSource errMessage, UtentiService utentiService) {
+    private PrenotazioniController(PrenotazioniService prenotazioniService, ResourceBundleMessageSource errMessage, UtentiService utentiService, VeicoliService veicoliService) {
         this.prenotazioniService = prenotazioniService;
         this.errMessage = errMessage;
         this.utentiService = utentiService;
+        this.veicoliService = veicoliService;
     }
 
     @GetMapping(value = "/cerca/userid/{userId}")
     @SneakyThrows
-    public ResponseEntity <PageResponse<PrenotazioneDto>>getPrenotazioneByUserId(
+    public ResponseEntity <PageResponse<PrenotazioneDto>> getPrenotazioneByUserId(
             @PathVariable("userId") String userId,
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int recordsPerPage,
@@ -70,6 +71,30 @@ public class PrenotazioniController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/modifica/{idPrenotazione}")
+    @SneakyThrows
+    public ResponseEntity<PrenotazioneFormDto> getModificaPrenotazionePage(
+            @PathVariable(name = "idPrenotazione") String idPrenotazione){
+
+        PrenotazioneDto prenotazione = prenotazioniService.selById(Integer.parseInt(idPrenotazione));
+        if(prenotazione == null) {
+            throw new NotFoundException("La prenotazione che si vuol modificare non esiste!");
+        }
+
+        VeicoloDto veicolo = veicoliService.selById(prenotazione.getIdVeicolo());
+        veicolo.setPrenotazioni(null);
+        UtenteDto utente = utentiService.selById(prenotazione.getIdUtente());
+        utente.setPrenotazioni(null);
+
+        PrenotazioneFormDto prenotazioneFormData = new PrenotazioneFormDto(
+                prenotazione,
+                veicolo,
+                utente,
+                LocalDate.now().plusDays(3));
+
+        return ResponseEntity.ok(prenotazioneFormData);
     }
 
     @PostMapping("/inserisci")

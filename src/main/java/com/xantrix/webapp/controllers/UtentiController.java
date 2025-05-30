@@ -96,6 +96,18 @@ public class UtentiController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/admin/modifica/{userId}")
+    @SneakyThrows
+    public ResponseEntity<UtenteDto> searchUtenti(
+            @PathVariable(name = "userId") String userId){
+
+        UtenteDto utente = utentiService.selById(Integer.parseInt(userId));
+        if(utente == null)
+            throw new NotFoundException("Errore: utente che si cerca di modificare non esiste!");
+
+        return ResponseEntity.ok(utente);
+    }
+
     // ------------------- INSERIMENTO / MODIFICA COSTUMER ------------------------------------
     @PostMapping(value = "/inserisci")
     @SneakyThrows

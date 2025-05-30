@@ -58,6 +58,18 @@ public class VeicoliController {
         return veicolo;
     }
 
+    @GetMapping("admin/modifica/{veicoloId}")
+    @SneakyThrows
+    public ResponseEntity<VeicoloDto> searchUtenti(
+            @PathVariable(name = "veicoloId") String veicoloId){
+
+        VeicoloDto veicolo = veicoliService.selById(Integer.parseInt(veicoloId));
+        if(veicolo == null)
+            throw new NotFoundException("Errore: il veicolo che si cerca di modificare non esiste!");
+
+        return ResponseEntity.ok(veicolo);
+    }
+
     // ------------------- OTTENIMENTO LISTA VEICOLI CON PAGING  ------------------------------------
     @GetMapping("/admin/parcoauto")
     public ResponseEntity<PageResponse<VeicoloDto>> searchUtenti(
