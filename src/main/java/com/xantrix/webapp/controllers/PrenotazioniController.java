@@ -114,13 +114,13 @@ public class PrenotazioniController {
             log.info(">>>Inserimento Nuova Prenotazione");
             if (prenotazioniService.isPrenotazioneNotEditable(prenotazione.getDataInizio())) {
                 return ResponseEntity.badRequest()
-                        .body(new DateNotValidException(">>La data di inizio e' troppo vicina!"));
+                        .body(new InfoMsg(LocalDate.now(), ">>La data di inizio non e' valida!"));
             }
         }
 
         if (prenotazione.getDataInizio().after(prenotazione.getDataFine())) {
             return ResponseEntity.badRequest()
-                    .body(new DateNotValidException(">>Date inserite non valide: la data di inizio deve essere precedente alla data fine"));
+                    .body(new InfoMsg(LocalDate.now(),">>Date inserite non valide: la data di inizio deve essere precedente alla data fine"));
         }
 
         prenotazione.setIdUtente(Integer.parseInt(idUtente));

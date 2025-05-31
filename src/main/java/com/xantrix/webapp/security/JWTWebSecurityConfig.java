@@ -53,22 +53,22 @@ public class JWTWebSecurityConfig
 
 	@Bean
 	@SneakyThrows
-    SecurityFilterChain securityFilterChain(HttpSecurity http) 
-	{
+	SecurityFilterChain securityFilterChain(HttpSecurity http) {
 		http
-			.csrf(AbstractHttpConfigurer::disable)
-			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-			.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.httpBasic(e -> e.realmName(REALM).authenticationEntryPoint(getBasicAuthEntryPoint()))
-			.addFilterBefore(jwtAuthenticationTokenFilter,  UsernamePasswordAuthenticationFilter.class)
-				.authorizeHttpRequests(authz ->
-						authz
-								.requestMatchers("/auth").permitAll()
-								.requestMatchers(ADMIN_MATCHER).hasRole("ADMIN")
-								.requestMatchers(USER_MATCHER).hasRole("USER")
-								.anyRequest().permitAll()
+				.csrf(AbstractHttpConfigurer::disable)
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+				.sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.exceptionHandling(exceptions -> exceptions
+						.authenticationEntryPoint(getBasicAuthEntryPoint())
+				)
+				.authorizeHttpRequests(authz -> authz
+						.requestMatchers("/auth").permitAll()
+						.requestMatchers(ADMIN_MATCHER).hasRole("ADMIN")
+						.requestMatchers(USER_MATCHER).hasRole("USER")
+						.anyRequest().authenticated()
 				);
-		
+
+		http.addFilterAfter(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
 

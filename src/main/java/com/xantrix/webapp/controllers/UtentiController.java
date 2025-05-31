@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.xantrix.webapp.dtos.InfoMsg;
 import com.xantrix.webapp.dtos.PageResponse;
 import com.xantrix.webapp.dtos.UtenteDto;
-import com.xantrix.webapp.exception.AuthenticationException;
-import com.xantrix.webapp.exception.BindingException;
-import com.xantrix.webapp.exception.DateNotValidException;
-import com.xantrix.webapp.exception.NotFoundException;
+import com.xantrix.webapp.exception.*;
 import com.xantrix.webapp.services.UtentiService;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
@@ -143,6 +140,8 @@ public class UtentiController {
                         .body(new InfoMsg(LocalDate.now(), "L'email inserita esiste e' gia' in uso!"));
             }
 
+            //Controllo se la password e quella di conferma coincidono
+
             utente.setPassword(passwordEncoder.encode(utente.getPassword()));
             utentiService.insertCostumer(utente);
         }
@@ -192,23 +191,14 @@ public class UtentiController {
     // ------------------- ELIMINAZIONE UTENTE ------------------------------------
     @DeleteMapping(value = "/elimina/{id}")
     @SneakyThrows
-    public ResponseEntity<?> deleteUser(@PathVariable("id") String userId)
-    {
+    public ResponseEntity<?> deleteUser(@PathVariable("id") String userId) {
         log.info("Eliminiamo l'utente con id " + userId);
 
-        UtenteDto utente = utentiService.selById(Integer.parseInt(userId));
-        if (utente == null)
-        {
-            String MsgErr = String.format("Utente %s non presente in anagrafica! ", userId);
-            log.warning(MsgErr);
-            throw new NotFoundException(MsgErr);
-        }
 
-        utentiService.deleteCostumer(utente.getId());
+        utentiService.deleteCostumer(Integer.parseInt(userId));
 
         HttpHeaders headers = new HttpHeaders();
         ObjectMapper mapper = new ObjectMapper();
-
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         ObjectNode responseNode = mapper.createObjectNode();

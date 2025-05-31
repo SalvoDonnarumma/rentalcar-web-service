@@ -2,7 +2,11 @@ package com.xantrix.webapp.services;
 
 import com.xantrix.webapp.dtos.UtenteDto;
 import com.xantrix.webapp.entities.Utente;
+import com.xantrix.webapp.exception.EntityHasReservationsException;
+import com.xantrix.webapp.repository.PrenotazioniRepository;
 import com.xantrix.webapp.repository.UtentiRepository;
+import lombok.SneakyThrows;
+import lombok.extern.java.Log;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,11 +19,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Log
 @Service
 public class UtentiServiceImpl implements UtentiService {
 
     @Autowired
     private UtentiRepository utentiRepository;
+    @Autowired
+    private PrenotazioniRepository prenotazioniRepository;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -39,11 +46,6 @@ public class UtentiServiceImpl implements UtentiService {
         } else if(campoFiltro.equalsIgnoreCase("id")){
             Integer id = Integer.parseInt(filtro);
             Optional<Utente> utente = utentiRepository.findById(id);
-            /*
-            if(utente.isPresent())
-                resultPage = new PageImpl<>(List.of(utente.get()), pageAndRecords, 1);
-            else
-                resultPage = new PageImpl<>(List.of(), pageAndRecords, 0); */
 
             resultPage = utente.<Page<Utente>>map(value -> new PageImpl<>(List.of(value), pageAndRecords, 1)).orElseGet(() -> new PageImpl<>(List.of(), pageAndRecords, 0));
         } else if(campoFiltro.equalsIgnoreCase("nome")) {
@@ -68,7 +70,15 @@ public class UtentiServiceImpl implements UtentiService {
     }
 
     @Override
+    @SneakyThrows
     public void deleteCostumer(Integer id) {
+        if(prenotazioniRepository.existsByUtenteIdUtente(id)) {
+            log.info("Sono presenti delle prenotazioni per il costumer con id " + id);
+            prenotazioniRepository.deleteByUserId(id);
+            log.info("Le prenotazioni sono state cancellate " + id);
+        }
+
+        log.info("Ora cancelliamo il costumer");
         Utente utente = null;
         if(utentiRepository.findById(id).isPresent()) {
             utente = utentiRepository.findById(id).get();

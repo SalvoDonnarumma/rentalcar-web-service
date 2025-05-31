@@ -36,8 +36,15 @@ public class JwtTokenAuthorizationOncePerRequestFilter extends OncePerRequestFil
 
 	@Override
 	@SneakyThrows
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-	{
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) {
+
+		String path = request.getRequestURI();
+		// Salta il filtro per l'endpoint di autenticazione
+		if ("/auth".equals(path)) {
+			chain.doFilter(request, response);
+			return;
+		}
+
 		log.info(String.format("Authentication Request For '%s'", request.getRequestURL()));
 
 		final String requestTokenHeader = request.getHeader(this.tokenHeader);
@@ -45,6 +52,7 @@ public class JwtTokenAuthorizationOncePerRequestFilter extends OncePerRequestFil
 
 		String username = null;
 		String jwtToken = null;
+		boolean isTokenExpired = false;
 
 		if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
 			jwtToken = requestTokenHeader.substring(7);
@@ -52,21 +60,27 @@ public class JwtTokenAuthorizationOncePerRequestFilter extends OncePerRequestFil
 				username = jwtTokenUtil.getUsernameFromToken(jwtToken);
 			} catch (IllegalArgumentException e) {
 				logger.error("IMPOSSIBILE OTTENERE LA USERID", e);
+				sendErrorResponse(response, "Token non valido");
+				return;
 			} catch (ExpiredJwtException e) {
+				isTokenExpired = true;
+				username = e.getClaims().getSubject(); // Ottieni username dal token scaduto
 				logger.warn("TOKEN SCADUTO", e);
+				sendErrorResponse(response, "Token scaduto");
+				return;
 			}
 		} else {
 			logger.warn("TOKEN NON VALIDO");
+			sendErrorResponse(response, "Token di autorizzazione assente o non valido");
+			return;
 		}
 
 		log.warning(String.format("JWT_TOKEN_USERNAME_VALUE '%s'", username));
 
-		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null)
-		{
+		if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 			UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
-			if (jwtTokenUtil.validateToken(jwtToken, userDetails))
-			{
+			if (!isTokenExpired && jwtTokenUtil.validateToken(jwtToken, userDetails)) {
 				UsernamePasswordAuthenticationToken authentication =
 						new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
@@ -74,17 +88,21 @@ public class JwtTokenAuthorizationOncePerRequestFilter extends OncePerRequestFil
 				SecurityContextHolder.getContext().setAuthentication(authentication);
 
 				log.info(">>>>Authenticated user: " + username + " with roles: " + userDetails.getAuthorities());
-			}
-			else
-			{
+			} else {
 				log.warning(">>>>Token NON valido per l'utente " + username);
+				sendErrorResponse(response, "Token non valido");
+				return;
 			}
-		}
-		else
-		{
-			log.warning(">>>>Username nullo o Authentication già presente nel contesto");
 		}
 
 		chain.doFilter(request, response);
+	}
+
+	@SneakyThrows
+	private void sendErrorResponse(HttpServletResponse response, String message) {
+		response.setContentType("application/json");
+		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+		response.getWriter().write("{\"error\":\"" + message + "\"}");
+		response.getWriter().flush();
 	}
 }

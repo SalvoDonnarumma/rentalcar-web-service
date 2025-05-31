@@ -39,6 +39,18 @@ public class RestExceptionHandler extends  ResponseEntityExceptionHandler
         return new ResponseEntity<ErrorResponse>(errore, new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(EntityHasReservationsException.class)
+    public ResponseEntity<ErrorResponse> exceptionEntityHasReservationsHandler(Exception ex)
+    {
+        ErrorResponse errore = new ErrorResponse();
+
+        errore.setDate(LocalDate.now());
+        errore.setCode(HttpStatus.CONFLICT.value());
+        errore.setMessage(ex.getMessage());
+
+        return new ResponseEntity<ErrorResponse>(errore, new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler({AuthenticationException.class })
     public ResponseEntity<String> handleAuthenticationException(AuthenticationException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());

@@ -1,8 +1,11 @@
 package com.xantrix.webapp.services;
 
 import com.xantrix.webapp.dtos.VeicoloDto;
+import com.xantrix.webapp.entities.Utente;
 import com.xantrix.webapp.entities.Veicolo;
+import com.xantrix.webapp.repository.PrenotazioniRepository;
 import com.xantrix.webapp.repository.VeicoliRepository;
+import lombok.extern.java.Log;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,11 +16,14 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Log
 @Service
 public class VeicoliServiceImpl implements VeicoliService {
 
     @Autowired
     private VeicoliRepository veicoliRepository;
+    @Autowired
+    private PrenotazioniRepository prenotazioniRepository;
     @Autowired
     private ModelMapper modelMapper;
 
@@ -33,8 +39,17 @@ public class VeicoliServiceImpl implements VeicoliService {
 
     @Override
     public void delVeicoloById(Integer id) {
+        if(prenotazioniRepository.existsByVeicoloIdVeicolo(id)) {
+            log.info("Sono presenti delle prenotazioni per il veicolo con id " + id);
+            prenotazioniRepository.deleteByVeicoloId(id);
+            log.info("Le prenotazioni sono state cancellate " + id);
+        }
+
+        log.info("Ora cancelliamo il veicolo");
+        Veicolo veicolo = null;
         if(veicoliRepository.findById(id).isPresent()) {
-            veicoliRepository.deleteById(id);
+            veicolo = veicoliRepository.findById(id).get();
+            veicoliRepository.delete(veicolo);
         }
     }
 
