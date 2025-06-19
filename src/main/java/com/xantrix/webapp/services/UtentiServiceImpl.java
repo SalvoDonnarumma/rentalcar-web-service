@@ -113,6 +113,13 @@ public class UtentiServiceImpl implements UtentiService {
         return utentiRepository.findByEmail(email).isPresent();
     }
 
+    @Override
+    public List<UtenteDto> emailContains(String filtro) {
+        Pageable pageAndRecords = PageRequest.of(0, 1);
+        List<Utente> utente = utentiRepository.findByEmailContainingIgnoreCase(filtro, pageAndRecords).getContent();
+        return ConvertToDto(utente);
+    }
+
     private List<UtenteDto> ConvertToDto(List<Utente> utenti) {
         List<UtenteDto> utentiDtoList = utenti
                 .stream()

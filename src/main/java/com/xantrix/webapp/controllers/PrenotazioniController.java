@@ -73,6 +73,46 @@ public class PrenotazioniController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping(value = "/cerca/email/{email}")
+    @SneakyThrows
+    public ResponseEntity <PageResponse<PrenotazioneDto>> getPrenotazioneByEmail(
+            @PathVariable("email") String email,
+            @RequestParam(defaultValue = "1") int pageNum,
+            @RequestParam(defaultValue = "10") int recordsPerPage,
+            @RequestParam(name = "diff", defaultValue = "0") int diffPage,
+            @RequestParam(required = false, defaultValue = "") String dataInit,
+            @RequestParam(required = false, defaultValue = "") String dataFin)
+    {
+        UtenteDto utente = utentiService.selByEmail(email);
+        if (utente == null) {
+            String ErrMsg = String.format("Lo userId inserto %s non e' presente nel database!", email);
+            log.warning(ErrMsg);
+            throw new NotFoundException(ErrMsg);
+        } else {
+            log.info(String.format("L'utente %s e' stato trovato!", email));
+        }
+
+        if (pageNum >= 1) {
+            pageNum += diffPage;
+        } else {
+            pageNum = 1;
+        }
+
+        int pageZeroBased = pageNum - 1;
+
+        List<PrenotazioneDto> prenotazioni = prenotazioniService.selByIdUtente(utente.getId(), pageZeroBased, recordsPerPage, dataInit, dataFin);
+        int totalRecords = utentiService.getNumRecords();
+
+        PageResponse<PrenotazioneDto> response = new PageResponse<>(
+                prenotazioni,
+                pageZeroBased,
+                recordsPerPage,
+                totalRecords
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/modifica/{idPrenotazione}")
     @SneakyThrows
     public ResponseEntity<PrenotazioneFormDto> getModificaPrenotazionePage(
@@ -97,34 +137,44 @@ public class PrenotazioniController {
         return ResponseEntity.ok(prenotazioneFormData);
     }
 
+    @GetMapping("/visualizzaprenotazioni/userid/{userId}")
+    @SneakyThrows
+    public ResponseEntity <PageResponse<PrenotazioneDto>> getVisualizzaPrenotazioniUtente(@PathVariable("userId") String userId){
+        List<PrenotazioneDto> prenotazioni = prenotazioniService.selByIdUtente(Integer.parseInt(userId), 0, 99, "","");
+
+        PageResponse<PrenotazioneDto> response = new PageResponse<>(
+                prenotazioni,
+                0,
+                99,
+                prenotazioni.size()
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/inserisci")
     @SneakyThrows
-    public ResponseEntity<?> insertPrenotazioni(
-            @RequestBody PrenotazioneDto prenotazione,
-            @RequestParam(name="idVeicolo", required=true) String idVeicolo,
-            @RequestParam(name="idUtente", required=true) String idUtente) {
-
+    public ResponseEntity<?> insertPrenotazioni(@RequestBody PrenotazioneDto prenotazione) {
+        log.info("Prenotazione passata: "+prenotazione);
         if(prenotazione.getIdPrenotazione() != null) {
             log.info(">>>Modifica Prenotazione");
             if (prenotazioniService.isPrenotazioneNotEditable(prenotazione.getDataInizio())) {
                 return ResponseEntity.badRequest()
-                        .body(new DateNotValidException(">>Non è piu' possibile modificare la prenotazione"));
+                        .body(new DateNotValidException("ERRORE: Non è piu' possibile modificare la prenotazione"));
             }
         } else {
             log.info(">>>Inserimento Nuova Prenotazione");
             if (prenotazioniService.isPrenotazioneNotEditable(prenotazione.getDataInizio())) {
                 return ResponseEntity.badRequest()
-                        .body(new InfoMsg(LocalDate.now(), ">>La data di inizio non e' valida!"));
+                        .body(new InfoMsg(LocalDate.now(), "ERRORE: La data di inizio non e' valida!"));
             }
         }
 
         if (prenotazione.getDataInizio().after(prenotazione.getDataFine())) {
             return ResponseEntity.badRequest()
-                    .body(new InfoMsg(LocalDate.now(),">>Date inserite non valide: la data di inizio deve essere precedente alla data fine"));
+                    .body(new InfoMsg(LocalDate.now(),"ERRORE: Date inserite non valide"));
         }
 
-        prenotazione.setIdUtente(Integer.parseInt(idUtente));
-        prenotazione.setIdVeicolo(Integer.parseInt(idVeicolo));
         prenotazione.setIsPrenotazioneValid(true);
         prenotazione.setStato("IN ATTESA");
 
@@ -180,4 +230,6 @@ public class PrenotazioniController {
         return new ResponseEntity<InfoMsg>(new InfoMsg(LocalDate.now(),
                 String.format("La prenotazione %s è stata elimina con successo", idPrenotazione)), HttpStatus.CREATED);
     }
+
+
 }

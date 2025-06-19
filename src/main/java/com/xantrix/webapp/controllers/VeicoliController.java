@@ -36,16 +36,10 @@ public class VeicoliController {
         this.errMessage = errMessage;
     }
 
-    @GetMapping(value="/cerca/tutti")
-    public List<VeicoloDto> getAllVehicles(){
-        log.info("Otteniamo tutti i veicoli");
-        return veicoliService.selAll();
-    }
-
-    @GetMapping("/cerca/veicolid/{veicoliId}")
+    @GetMapping("/cerca/veicoloid/{veicoloId}")
     @SneakyThrows
-    public VeicoloDto getVeicoli(@PathVariable("veicoliId") String veicoliId) {
-        log.info("Otteniamo l'utente " + veicoliId);
+    public VeicoloDto getVeicoli(@PathVariable("veicoloId") String veicoliId) {
+        log.info("Otteniamo il veicolo... " + veicoliId);
         VeicoloDto veicolo = veicoliService.selById(Integer.parseInt(veicoliId));
 
         if(veicolo == null) {
@@ -56,6 +50,70 @@ public class VeicoliController {
             {
                 log.info(String.format("Il veicolo %s e' stato trovato!", veicoliId));
             }
+        return veicolo;
+    }
+
+    @GetMapping("/cerca/targa/{targa}")
+    @SneakyThrows
+    public List<VeicoloDto> getVeicoloByTarga(@PathVariable("targa") String targa) {
+        List<VeicoloDto> veicolo = veicoliService.selByTarga(targa);
+
+        if(veicolo == null) {
+            String ErrMsg = String.format("Il veicolo %s non e' stato trovato!", targa);
+            log.warning(ErrMsg);
+            throw new NotFoundException(ErrMsg);
+        } else
+        {
+            log.info(String.format("Il veicolo %s e' stato trovato!", targa));
+        }
+        return veicolo;
+    }
+
+    @GetMapping("/cerca/modello/{modello}")
+    @SneakyThrows
+    public List<VeicoloDto> getVeicoloByModello(@PathVariable("modello") String modello) {
+        List<VeicoloDto> veicolo = veicoliService.selByModello(modello);
+
+        if(veicolo == null) {
+            String ErrMsg = String.format("Il veicolo %s non e' stato trovato!", modello);
+            log.warning(ErrMsg);
+            throw new NotFoundException(ErrMsg);
+        } else
+        {
+            log.info(String.format("Il veicolo %s e' stato trovato!", modello));
+        }
+        return veicolo;
+    }
+
+    @GetMapping("/cerca/casaProd/{casaProd}")
+    @SneakyThrows
+    public List<VeicoloDto> getVeicoloByCasaProduttrice(@PathVariable("casaProd") String casaProd) {
+        List<VeicoloDto> veicolo = veicoliService.selByCasaProduttrice(casaProd);
+
+        if(veicolo == null) {
+            String ErrMsg = String.format("Il veicolo %s non e' stato trovato!", casaProd);
+            log.warning(ErrMsg);
+            throw new NotFoundException(ErrMsg);
+        } else
+        {
+            log.info(String.format("Il veicolo %s e' stato trovato!", casaProd));
+        }
+        return veicolo;
+    }
+
+    @GetMapping("/cerca/tipologia/{tipologia}")
+    @SneakyThrows
+    public List<VeicoloDto> getVeicoloByTipologia(@PathVariable("tipologia") String tipologia) {
+        List<VeicoloDto> veicolo = veicoliService.selByTipologia(tipologia);
+
+        if(veicolo == null) {
+            String ErrMsg = String.format("Il veicolo %s non e' stato trovato!", tipologia);
+            log.warning(ErrMsg);
+            throw new NotFoundException(ErrMsg);
+        } else
+        {
+            log.info(String.format("Il veicolo %s e' stato trovato!", tipologia));
+        }
         return veicolo;
     }
 
@@ -71,8 +129,8 @@ public class VeicoliController {
         return ResponseEntity.ok(veicolo);
     }
 
-    // ------------------- OTTENIMENTO LISTA VEICOLI CON PAGING  ------------------------------------
-    @GetMapping("/admin/parcoauto")
+    // ------------------- OTTENIMENTO LISTA VEICOLI ------------------------------------
+    @GetMapping("/parcoauto")
     public ResponseEntity<PageResponse<VeicoloDto>> searchUtenti(
             @RequestParam(defaultValue = "1") int pageNum,
             @RequestParam(defaultValue = "10") int recordsPerPage,
@@ -89,7 +147,7 @@ public class VeicoliController {
 
         int pageZeroBased = pageNum - 1;
 
-        List<VeicoloDto> veicoli = veicoliService.searchVeicoli(filtro, campoFiltro, pageZeroBased, recordsPerPage);
+        List<VeicoloDto> veicoli = veicoliService.selAll();
         int totalRecords = veicoliService.getNumRecords();
 
         PageResponse<VeicoloDto> response = new PageResponse<>(

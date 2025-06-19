@@ -46,10 +46,10 @@ public class JWTWebSecurityConfig
 		return new BCryptPasswordEncoder();
 	}
 
-	private static final String[] USER_MATCHER = { "/utenti/cerca/tutti", "/utenti/inserisci/", "/utenti/modifica/**", "/veicoli/cerca/tutti/",
+	private static final String[] USER_MATCHER = { "/utenti/inserisci/", "/utenti/modifica/**",
 			"/prenotazioni/modifica/**", "/prenotazioni/inserisci", "/prenotazioni/elimina/**", "/prenotazioni/cerca/userid/"};
 	private static final String[] ADMIN_MATCHER = { "/utenti/cerca/userid/**", "/utenti/admin/**", "utenti/elimina/**", "/utenti/admin/homepage", "/admin/modifica/**",
-			"/veicoli/cerca/veicoloid/**", "/veicoli/admin/**", "/veicoli/inserisci/**", "/veicoli/elimina/**","/prenotazioni/valida/**"};
+			"/veicoli/admin/**", "/veicoli/inserisci/**", "/veicoli/elimina/**","/prenotazioni/valida/**"};
 
 	@Bean
 	@SneakyThrows
@@ -89,7 +89,7 @@ public class JWTWebSecurityConfig
 		  allowedHeaders.add("Cache-Control");
 
 	      CorsConfiguration configuration = new CorsConfiguration();
-	      configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080/"));
+	      configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200/"));
 	      configuration.setAllowedMethods(Arrays.asList("GET","POST","OPTIONS","DELETE","PUT"));
 	      configuration.setMaxAge((long) 3600);
 	      configuration.setAllowedHeaders(allowedHeaders);

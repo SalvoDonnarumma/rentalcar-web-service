@@ -1,7 +1,6 @@
 package com.xantrix.webapp.services;
 
 import com.xantrix.webapp.dtos.VeicoloDto;
-import com.xantrix.webapp.entities.Utente;
 import com.xantrix.webapp.entities.Veicolo;
 import com.xantrix.webapp.repository.PrenotazioniRepository;
 import com.xantrix.webapp.repository.VeicoliRepository;
@@ -54,10 +53,43 @@ public class VeicoliServiceImpl implements VeicoliService {
     }
 
     @Override
-    public VeicoloDto selByTarga(String targa) {
-        Pageable pageAndRecords = PageRequest.of(0, 1);
-        Veicolo veicolo = (veicoliRepository.findByTarga(targa,pageAndRecords).getContent().get(0));
-        return ConvertToDto(veicolo);
+    public List<VeicoloDto> selByTarga(String targa) {
+        Pageable pageAndRecords = PageRequest.of(0, 30);
+        List<Veicolo> veicoli = veicoliRepository.findByTarga(targa, pageAndRecords).getContent();
+        if (veicoli.isEmpty()) {
+            return null;
+        }
+        return ConvertToDto(veicoli);
+    }
+
+    @Override
+    public List<VeicoloDto> selByModello(String modello) {
+        Pageable pageAndRecords = PageRequest.of(0, 30);
+        List<Veicolo> veicoli = veicoliRepository.findByModello(modello, pageAndRecords).getContent();
+        if (veicoli.isEmpty()) {
+            return null;
+        }
+        return ConvertToDto(veicoli);
+    }
+
+    @Override
+    public List<VeicoloDto> selByCasaProduttrice(String casaProduttrice) {
+        Pageable pageAndRecords = PageRequest.of(0, 30);
+        List<Veicolo> veicoli = veicoliRepository.findByCasaProduttrice(casaProduttrice, pageAndRecords).getContent();
+        if (veicoli.isEmpty()) {
+            return null;
+        }
+        return ConvertToDto(veicoli);
+    }
+
+    @Override
+    public List<VeicoloDto> selByTipologia(String tipologia) {
+        Pageable pageAndRecords = PageRequest.of(0, 30);
+        List<Veicolo> veicoli = veicoliRepository.findByTipologia(tipologia, pageAndRecords).getContent();
+        if (veicoli.isEmpty()) {
+            return null;
+        }
+        return ConvertToDto(veicoli);
     }
 
     @Override

@@ -17,7 +17,8 @@ public interface PrenotazioniService {
     public void insertPrenotazione(PrenotazioneDto prenotazione);
 
     void eliminaPrenotazione(Integer id);
-    public void aggiornaStatoPrenotazione(Set<PrenotazioneDto> prenotazioni);
+    public void aggiornaStatoPrenotazione(List<PrenotazioneDto> prenotazioni);
+    public void aggiornaStatoPrenotazione(PrenotazioneDto prenotazione);
     public LocalDate convertDateToLocalDate(java.util.Date data);
     public boolean isPrenotazioneNotEditable(Integer id);
     public boolean isPrenotazioneNotEditable(java.util.Date dataInizio);

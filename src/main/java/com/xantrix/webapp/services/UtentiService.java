@@ -22,4 +22,5 @@ public interface UtentiService {
 
     public boolean emailExists(String email, Integer idUtente);
     public boolean emailExists(String email);
+    public List<UtenteDto> emailContains(String filtro);
 }

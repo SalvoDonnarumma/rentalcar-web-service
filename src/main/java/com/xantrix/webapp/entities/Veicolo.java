@@ -1,5 +1,6 @@
 package com.xantrix.webapp.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,5 +37,6 @@ public class Veicolo {
     private String tipologia;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "veicolo", orphanRemoval = true)
+    @JsonManagedReference
     private Set<Prenotazione> prenotazioni = new HashSet<>();
 }

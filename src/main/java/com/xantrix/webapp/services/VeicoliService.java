@@ -16,7 +16,10 @@ public interface VeicoliService {
 
     void delVeicoloById(Integer id);
 
-    public VeicoloDto selByTarga(String targa);
+    public List<VeicoloDto> selByTarga(String targa);
+    public List<VeicoloDto> selByModello(String modello);
+    public List<VeicoloDto> selByCasaProduttrice(String casaProduttrice);
+    public List<VeicoloDto> selByTipologia(String topologia);
 
     public VeicoloDto selById(Integer id);
 }

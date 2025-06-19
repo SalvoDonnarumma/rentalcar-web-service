@@ -9,23 +9,18 @@ import com.xantrix.webapp.exception.*;
 import com.xantrix.webapp.services.UtentiService;
 import lombok.SneakyThrows;
 import lombok.extern.java.Log;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 
 @Log
 @RestController
@@ -42,11 +37,30 @@ public class UtentiController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    @GetMapping(value = "/cerca/tutti")
-    public List<UtenteDto> getAllUser()
+    @GetMapping(value = "/cerca/filtro/{filtro}")
+    @SneakyThrows
+    public ResponseEntity<PageResponse<UtenteDto>> searchUsersUsingEmail(@PathVariable("filtro") String filtro)
     {
-        log.info("Otteniamo tutti gli utenti");
-        return utentiService.selAll();
+        List<UtenteDto> utenti = utentiService.emailContains(filtro);
+        if (utenti == null)
+        {
+            String ErrMsg = String.format("L'utente %s non e' stato trovato!", filtro);
+            log.warning(ErrMsg);
+            throw new NotFoundException(ErrMsg);
+        }
+        else
+        {
+            log.info(String.format("L'utente %s e' stato trovato!", filtro));
+        }
+
+        PageResponse<UtenteDto> response = new PageResponse<>(
+                utenti,
+                1,
+                10,
+                utenti.size()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping(value = "/cerca/userid/{userId}")
@@ -71,7 +85,28 @@ public class UtentiController {
         return utente;
     }
 
+    @GetMapping(value = "/cerca/email/{email}")
+    @SneakyThrows
+    public UtenteDto getUtenteByEmail(@PathVariable("email") String email)
+    {
+        UtenteDto utente = utentiService.selByEmail(email);
+
+        if (utente == null)
+        {
+            String ErrMsg = String.format("L'utente %s non e' stato trovato!", email);
+            log.warning(ErrMsg);
+            throw new NotFoundException(ErrMsg);
+        }
+        else
+        {
+            log.info(String.format("L'utente %s e' stato trovato!", email));
+        }
+
+        return utente;
+    }
+
     // ------------------- OTTENIMENTO LISTA COSTUMER CON PAGING  ------------------------------------
+    /*
     @GetMapping("/admin/homepage")
     public ResponseEntity<PageResponse<UtenteDto>> searchUtenti(
             @RequestParam(defaultValue = "1") int pageNum,
@@ -101,6 +136,27 @@ public class UtentiController {
 
         return ResponseEntity.ok(response);
     }
+    */
+
+    @GetMapping("/admin/homepage")
+    public ResponseEntity<PageResponse<UtenteDto>> getAllUtenti(
+            @RequestParam(name = "diff", defaultValue = "0") int diffPage,
+            @RequestParam(required = false) String filtro,
+            @RequestParam(required = false) String campoFiltro
+    ) {
+
+        List<UtenteDto> utenti = utentiService.selAll();
+        int totalRecords = utentiService.getNumRecords();
+
+        PageResponse<UtenteDto> response = new PageResponse<>(
+                utenti,
+                1,
+                10,
+                totalRecords
+        );
+
+        return ResponseEntity.ok(response);
+    }
 
     @GetMapping("/admin/modifica/{userId}")
     @SneakyThrows
@@ -125,6 +181,8 @@ public class UtentiController {
         } else
             log.info(">>>Inserimento Nuovo Utente");
 
+        log.info("Utente json passato: " + utente);
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String ruolo = authentication.getAuthorities().toString();
 
@@ -144,6 +202,7 @@ public class UtentiController {
 
             utente.setPassword(passwordEncoder.encode(utente.getPassword()));
             utentiService.insertCostumer(utente);
+            log.info("Utente inserito con successo!");
         }
 
         if( (ruolo.equalsIgnoreCase("[ROLE_ADMIN]") || ruolo.equalsIgnoreCase("[ROLE_USER]") ) && utente.getId()!=null) {
@@ -164,7 +223,7 @@ public class UtentiController {
             }
 
             //Controllo nuova password e conferma password
-            if(utente.getPassword()!=null) {
+            if(!utente.getPassword().isBlank()) {
                 if (!utente.getPassword().equals(utente.getConfermaPassword())) {
                     return ResponseEntity.badRequest()
                             .body(new InfoMsg(LocalDate.now(), "La password nuova e quella di conferma non coincidono!"));

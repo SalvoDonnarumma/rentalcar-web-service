@@ -1,5 +1,6 @@
 package com.xantrix.webapp.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,6 +37,7 @@ public class Utente {
 
     @Temporal(TemporalType.DATE)
     @Column(name = "data_nascita")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     //@NotNull(message = "{NotNull.Articoli.dataCreaz.Validation}")
     private Date dataNascita;
 

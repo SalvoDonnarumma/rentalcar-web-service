@@ -36,6 +36,7 @@ public class PrenotazioniServiceImpl implements PrenotazioniService {
         Pageable pageAndRecords = PageRequest.of(0, 1);
         if(prenotazioniRepository.existsById(id)) {
             prenotazioneDto = ConvertToDto(prenotazioniRepository.findByIdPrenotazione(id, pageAndRecords).getContent().get(0));
+            aggiornaStatoPrenotazione(prenotazioneDto);
             return prenotazioneDto;
         } else
             return null;
@@ -69,7 +70,9 @@ public class PrenotazioniServiceImpl implements PrenotazioniService {
                 throw new RuntimeException(e);
         }
 
-        return ConvertToDto(prenotazioni.getContent());
+        List<PrenotazioneDto> prenotazioneDtoList = ConvertToDto(prenotazioni.getContent());
+        aggiornaStatoPrenotazione(prenotazioneDtoList);
+        return prenotazioneDtoList;
     }
 
     @Override
@@ -129,7 +132,7 @@ public class PrenotazioniServiceImpl implements PrenotazioniService {
         return prenotazione;
     }
 
-    public void aggiornaStatoPrenotazione(Set<PrenotazioneDto> prenotazioni){
+    public void aggiornaStatoPrenotazione(List<PrenotazioneDto> prenotazioni){
         LocalDate limite = LocalDate.now().plusDays(2);
         for (PrenotazioneDto p : prenotazioni) {
             LocalDate dataInizio = convertDateToLocalDate(p.getDataInizio());
@@ -140,6 +143,18 @@ public class PrenotazioniServiceImpl implements PrenotazioniService {
 
             p.setIsPrenotazioneValid(dataInizio.isAfter(limite));
         }
+    }
+
+    public void aggiornaStatoPrenotazione(PrenotazioneDto prenotazione){
+        LocalDate limite = LocalDate.now().plusDays(2);
+        LocalDate dataInizio = convertDateToLocalDate(prenotazione.getDataInizio());
+
+        if (!dataInizio.isAfter(limite) && prenotazione.getStato().equals("IN ATTESA")) {
+            prenotazione.setStato("DECLINATO");
+                insertPrenotazione(prenotazione);
+            }
+
+        prenotazione.setIsPrenotazioneValid(dataInizio.isAfter(limite));
     }
 
     public LocalDate convertDateToLocalDate(java.util.Date data) {
